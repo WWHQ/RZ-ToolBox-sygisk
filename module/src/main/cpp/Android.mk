@@ -5,18 +5,18 @@
 #
 # Or use standalone toolchain:
 #   aarch64-linux-android-clang -shared -fPIC -O2 -DNDEBUG \
-#       -o libmountinfofix.so zygisk_mountinfo_fix.c -llog
+#       -o libcoreprop_bridge.so coreprop_bridge.c -llog
 
 LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
 ifeq ($(MODULE_NAME),)
-    MODULE_NAME := rz_toolbox
+    MODULE_NAME := coreprop_bridge
 endif()
 
 LOCAL_MODULE := $(MODULE_NAME)
-LOCAL_SRC_FILES := zygisk_mountinfo_fix.c
+LOCAL_SRC_FILES := coreprop_bridge.c
 LOCAL_CFLAGS := -Wall -Wextra -O2 -fvisibility=hidden
 LOCAL_LDLIBS := -llog
 LOCAL_LDFLAGS := -Wl,--gc-sections
