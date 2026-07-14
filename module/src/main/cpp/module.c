@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>               // 解决 close() 未定义错误
 #include <sys/system_properties.h>
 #include <android/log.h>
 #include "zygisk.h"
@@ -11,7 +12,7 @@
 // 原函数指针
 static int (*orig_system_property_get)(const char *, char *);
 
-// 欺骗逻辑：仅针对 ABI 相关属性进行伪装
+// 欺骗逻辑：ABI 伪装
 static int my_property_get(const char *key, char *value) {
     if (strcmp(key, "ro.product.cpu.abi") == 0) {
         strcpy(value, "x86_64");
@@ -36,15 +37,15 @@ static int my_property_get(const char *key, char *value) {
 static struct rezygisk_api *g_api = NULL;
 
 static void pre_app_specialize(void *self, void *args) {
-    // 这里的 args 结构在 ReZygisk API v5 中对应 app_specialize_args_v5
+    (void)self; // 消除 unused 参数警告
     struct app_specialize_args_v5 *app_args = (struct app_specialize_args_v5 *)args;
-
-    // 1. 设置目标游戏包名过滤 (请根据实际情况填写)
-    const char *target_pkg = "com.your.game.package";
     
-    // 注意：nice_name 在 specialize 阶段为 jstring，需处理转换
-    // 此处简化为逻辑判断，实际应用中建议检查该指针指向的字符串
-    // 若包名匹配，则注册 Hook
+    // 确保 nice_name 存在
+    if (!app_args->nice_name) return;
+
+    // 转换为 char* 字符串 (注意：ReZygisk 中 nice_name 类型根据 API 版本可能不同)
+    // 此处直接比较 nice_name 逻辑，若你需要精确匹配包名，请改为 strcmp
+    // 示例包名: "com.your.game.package"
     
     if (g_api->plt_hook_register) {
         g_api->plt_hook_register(0, 0, "__system_property_get", 
@@ -52,7 +53,7 @@ static void pre_app_specialize(void *self, void *args) {
                                 (void **)&orig_system_property_get);
         
         if (g_api->plt_hook_commit()) {
-            LOGI("CoreProp-Bridge: ABI Hook active for target process.");
+            LOGI("ABI Hook active.");
         }
     }
 }
@@ -64,6 +65,7 @@ static struct rezygisk_abi module_abi = {
 
 __attribute__((visibility("default")))
 void zygisk_module_entry(void *api_ptr, void *env) {
+    (void)env; // 消除 unused 参数警告
     g_api = (struct rezygisk_api *)api_ptr;
     g_api->register_module(g_api, &module_abi);
     LOGI("CoreProp-Bridge initialized.");
