@@ -6,8 +6,8 @@
 #include "zygisk.h"
 
 #define LOG_TAG "CoreProp-Bridge"
-// #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
-#define LOGI(...) ((void)0)
+#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
+//#define LOGI(...) ((void)0)
 
 static int (*orig_system_property_get)(const char *, char *);
 
