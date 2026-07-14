@@ -2,7 +2,7 @@
 SKIPUNZIP=1
 
 DEBUG=@DEBUG@
-SONAME=coreprop_bridge
+SONAME=@SONAME@
 SUPPORTED_ABIS="@SUPPORTED_ABIS@"
 
 if [ "$BOOTMODE" ] && [ "$KSU" ]; then
